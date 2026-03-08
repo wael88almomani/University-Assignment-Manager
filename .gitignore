@@ -26,9 +26,11 @@ wheels/
 # Backend
 backend/database.db
 backend/university_assignment_manager.db
+backend/*.db
 backend/logs/
 backend/.env
 backend/.env.local
+backend/.pytest_cache/
 
 # Frontend
 frontend/.dart_tool/

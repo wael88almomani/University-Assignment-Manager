@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.core.dependencies import (
     get_course_repository,
@@ -18,9 +18,25 @@ from app.presentation.schemas.group_schema import (
     SectionCreateRequest,
     SectionResponse,
 )
+from app.presentation.schemas.user_schema import UserListResponse
+from app.presentation.schemas.auth_schema import PaginationMeta
 
 
 router = APIRouter(prefix="/groups", tags=["Groups"])
+
+
+@router.get("/students", response_model=UserListResponse)
+def list_students_for_enrollment(
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=10, ge=1, le=100),
+    search: str = Query(default=""),
+    _: object = Depends(require_roles("teacher")),
+    user_repository: UserRepositoryImpl = Depends(get_user_repository),
+):
+    skip = (page - 1) * limit
+    students = user_repository.list_students(search=search, skip=skip, limit=limit)
+    total = user_repository.count_students(search=search)
+    return UserListResponse(data=students, meta=PaginationMeta(page=page, limit=limit, total=total))
 
 
 @router.post("/courses", response_model=CourseResponse, status_code=status.HTTP_201_CREATED)

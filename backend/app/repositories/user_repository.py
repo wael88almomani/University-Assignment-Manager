@@ -29,3 +29,11 @@ class UserRepository(ABC):
     @abstractmethod
     def delete(self, user_id: int) -> bool:
         raise NotImplementedError
+
+    @abstractmethod
+    def list_students(self, search: str, skip: int, limit: int) -> list[User]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def count_students(self, search: str) -> int:
+        raise NotImplementedError

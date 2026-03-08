@@ -4,8 +4,6 @@ from time import perf_counter
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from sqlalchemy.exc import NoSuchTableError
-from sqlalchemy import inspect, text
 from starlette import status
 
 from app.core.config import settings
@@ -32,20 +30,6 @@ Submission
 Course
 Section
 Enrollment
-
-
-def apply_safe_schema_updates() -> None:
-    inspector = inspect(engine)
-    try:
-        columns = {col["name"] for col in inspector.get_columns("assignments")}
-    except NoSuchTableError:
-        return
-    if "section_id" not in columns:
-        with engine.begin() as connection:
-            connection.execute(text("ALTER TABLE assignments ADD COLUMN section_id INTEGER"))
-
-
-apply_safe_schema_updates()
 
 Base.metadata.create_all(bind=engine)
 

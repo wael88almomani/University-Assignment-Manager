@@ -6,6 +6,7 @@ University Assignment Manager is a full-stack system for managing university ass
 
 - Teachers can create courses and sections.
 - Teachers can enroll students into sections.
+- Teachers can search students by name/email before enrollment.
 - Teachers create assignments for a specific section.
 - Students only see assignments for sections they are enrolled in.
 - Students submit text/file solutions.
@@ -16,8 +17,11 @@ University Assignment Manager is a full-stack system for managing university ass
 - JWT authentication and role-based access (`teacher`, `student`, `admin`)
 - Course -> Section -> Enrollment structure
 - Assignment visibility isolation by section
+- Teacher-friendly student enrollment flow (search + picker)
 - Submission upload and grading flow
 - Rate limiting for API and auth endpoints
+- Alembic database migrations for schema versioning
+- API integration tests for role-based access control
 - Flutter app with BLoC state management
 
 ## Tech Stack
@@ -44,6 +48,9 @@ University Assignment Manager is a full-stack system for managing university ass
 ```text
 University Assignment Manager/
 |-- backend/
+|   |-- alembic/
+|   |   `-- versions/
+|   |-- tests/
 |   |-- app/
 |   |   |-- core/
 |   |   |   |-- config.py
@@ -88,9 +95,13 @@ University Assignment Manager/
 |   |   |-- usecases/
 |   |   `-- main.py
 |   |-- requirements.txt
+|   |-- alembic.ini
+|   |-- pytest.ini
 |   |-- Dockerfile
 |   `-- uploads/
 |-- frontend/
+|   |-- assets/
+|   |   `-- icons/
 |   |-- lib/
 |   |   |-- core/
 |   |   |   |-- api/
@@ -124,6 +135,7 @@ University Assignment Manager/
 ```bash
 cd backend
 pip install -r requirements.txt
+alembic upgrade head
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
@@ -139,6 +151,37 @@ flutter run
 
 - `update-api-url.ps1`: updates Flutter API base URL for localhost/LAN/custom URL.
 - `deploy.ps1`: quick menu for APK build, backend run, combined flow, or Docker deploy.
+
+## Database Migrations
+
+Use Alembic for schema changes:
+
+```bash
+cd backend
+alembic revision --autogenerate -m "describe change"
+alembic upgrade head
+```
+
+For existing databases created before Alembic:
+
+```bash
+cd backend
+alembic stamp head
+```
+
+## Run API Tests
+
+```bash
+cd backend
+pytest -q
+```
+
+Current tests validate:
+
+- Teacher can create courses/sections.
+- Student cannot create courses/sections.
+- Student sees only assignments from enrolled sections.
+- Teacher cannot grade submissions for another teacher's assignments.
 
 ## API Health Check
 
