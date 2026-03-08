@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: university-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      # حفظ قاعدة البيانات
+      - ./backend/database.db:/app/database.db
+      # حفظ ملفات اللوجات
+      - ./backend/logs:/app/logs
+    environment:
+      # يُنصح بتغيير هذه القيم في Production
+      - SECRET_KEY=your-production-secret-key-change-this-in-production-min-32-chars
+      - ACCESS_TOKEN_EXPIRE_MINUTES=30
+      - DEBUG=False
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
